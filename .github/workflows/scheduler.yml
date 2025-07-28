@@ -1,4 +1,4 @@
-name: Scheduler
+name: Scheduler ⏰
 
 on:
   workflow_dispatch:
