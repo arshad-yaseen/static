@@ -31,12 +31,25 @@ jobs:
           SPONSORKIT_GITHUB_TOKEN: ${{ secrets.SPONSORKIT_GITHUB_TOKEN }}
           SPONSORKIT_GITHUB_LOGIN: arshad-yaseen
 
+      - name: Update yuku downloads badge
+        run: |
+          downloads=$(curl -fsSL "https://api.npmjs.org/downloads/point/last-week/yuku-parser,yuku-codegen,yuku-analyzer" \
+            | jq '[.[] | select(. != null) | .downloads] | add')
+          formatted=$(awk -v n="$downloads" 'BEGIN {
+            if (n >= 1000000) printf "%.1fM", n / 1000000
+            else if (n >= 1000) printf "%.0fk", n / 1000
+            else printf "%d", n
+          }')
+          mkdir -p badges
+          jq -n --arg msg "${formatted}/week" \
+            '{schemaVersion: 1, label: "downloads", message: $msg}' > badges/yuku-downloads.json
+
       - name: Commit changes
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "chore: update sponsors.svg [ci skip]" || echo "No changes to commit"
+          git commit -m "chore: update generated assets [ci skip]" || echo "No changes to commit"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
